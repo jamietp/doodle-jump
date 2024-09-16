@@ -171,3 +171,9 @@ function updateScoreDisplay() {
 playAgainButton.addEventListener('click', () => {
     restartGame();
 });
+
+// Prevent default scrolling behavior
+document.body.addEventListener('touchmove', function(e) {
+    e.preventDefault();
+}, { passive: false });
+
