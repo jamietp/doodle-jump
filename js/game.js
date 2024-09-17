@@ -4,7 +4,9 @@ const startButton = document.getElementById('startButton');
 const scoreElement = document.getElementById('score');
 const highScoreElement = document.getElementById('highScore');
 const playAgainButton = document.createElement('button');
+const userForm = document.getElementById('userForm');
 
+// Set canvas size
 canvas.width = 400;
 canvas.height = 600;
 
@@ -14,7 +16,39 @@ let bottomPlatform;
 let gameStarted = false;
 let gameOver = false;
 let score = 0;
-let highScore = 0;
+let highScore = localStorage.getItem('highScore') || 0; // Load high score from localStorage
+
+// 1. User input form handling
+const startGameButton = document.getElementById('startGameButton');
+
+startGameButton.addEventListener('click', function() {
+    const username = document.getElementById('username').value;
+    const wallet = document.getElementById('wallet').value;
+
+    if (username && wallet) {
+        // Save username and wallet in localStorage for persistence
+        localStorage.setItem('username', username);
+        localStorage.setItem('wallet', wallet);
+
+        // Hide the form and start the game
+        userForm.style.display = 'none';
+        startGame();
+    } else {
+        alert('Please enter both a username and wallet address.');
+    }
+});
+
+// 2. Function to start the game after input
+function startGame() {
+    resizeCanvas(); // Ensure canvas fits the window size
+    init();
+}
+
+// Resize canvas based on window size
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
 // Initialize game objects
 function init() {
@@ -60,21 +94,10 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-// Start game when the button is clicked
-startButton.addEventListener('click', () => {
-    startButton.style.display = 'none'; // Hide the start button
-    gameStarted = true;
-    init(); // Start the game
-});
-
-// Function to move the player based on X position
-// Function to move the player based on X position
 // Function to move the player based on X position
 function movePlayer(positionX) {
-    // Center the player on the X axis (align player center to input)
     player.x = positionX - player.width / 2;
 
-    // Ensure player doesn't go off the screen horizontally
     if (player.x < 0) {
         player.x = 0;
     } else if (player.x + player.width > canvas.width) {
@@ -86,20 +109,14 @@ function movePlayer(positionX) {
 document.addEventListener('touchmove', (e) => {
     const touch = e.touches[0];
     const touchX = touch.clientX;
-
-    // Move player based on touch's x position
     movePlayer(touchX);
 });
 
 // Add mouse movement for testing on desktop
 document.addEventListener('mousemove', (e) => {
     const mouseX = e.clientX;
-
-    // Move player based on mouse's x position
     movePlayer(mouseX);
 });
-
-
 
 // Generate multiple platforms
 function generatePlatforms() {
@@ -116,9 +133,9 @@ function generatePlatforms() {
 function triggerGameOver() {
     gameOver = true;
 
-    // Update high score if necessary
     if (score > highScore) {
         highScore = score;
+        localStorage.setItem('highScore', highScore); // Save high score to localStorage
         highScoreElement.innerText = `High Score: ${highScore}`;
     }
 
@@ -144,7 +161,6 @@ function triggerGameOver() {
 
 // Restart game
 function restartGame() {
-    // Reset game state
     gameOver = false;
     playAgainButton.style.display = 'none'; // Hide the button while the game is running
     gameStarted = true;
@@ -152,7 +168,6 @@ function restartGame() {
     player = new Player();
     bottomPlatform = new Platform(0, canvas.height - 20, canvas.width, 20);
 
-    // Generate new platforms and add the bottom platform
     platforms = generatePlatforms();
     platforms.push(bottomPlatform);
 
